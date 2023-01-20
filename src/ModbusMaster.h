@@ -223,6 +223,9 @@ public:
 	void enableTXpin(uint8_t);
 	void disableTXpin();
 	
+	uint8_t  setSlaveAddress(uint8_t);
+	uint8_t  getSlaveAddress();
+
 	uint8_t  readCoils(uint16_t, uint16_t);
 	uint8_t  readDiscreteInputs(uint16_t, uint16_t);
 	uint8_t  readHoldingRegisters(uint16_t, uint16_t);
