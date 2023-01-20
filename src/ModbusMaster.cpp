@@ -154,6 +154,26 @@ void ModbusMaster::begin(uint16_t u16BaudRate) {
 	MBSerial.begin(u16BaudRate);
 }
 
+/**
+Enable reading and setting of slave address to use for next transaction.
+
+When called, it updates the current slave device address.
+
+This is an extension of the standard ModbusMaster library to accomodate 
+communicating with multiple different slave devices on the bus
+
+@ingroup setup
+*/
+uint8_t ModbusMaster::setSlaveAddress(uint8_t u8MBSlave)
+{
+	_u8MBSlave = u8MBSlave;
+	return _u8MBSlave;
+}
+
+uint8_t  ModbusMaster::getSlaveAddress()
+{
+	return _u8MBSlave;
+}
 
 /**
 Enable printing of debug messages.
@@ -482,18 +502,21 @@ Modbus function 0x05 Write Single Coil.
 
 This function code is used to write a single output to either ON or OFF 
 in a remote device. The requested ON/OFF state is specified by a 
-constant in the state field. A non-zero value requests the output to be 
-ON and a value of 0 requests it to be OFF. The request specifies the 
-address of the coil to be forced. Coils are addressed starting at zero.
+constant in the state field. 
+ - A non-zero (0xff) value requests the output to be ON
+ - Special case 0x55 = TOGGLE 
+ - Aalue of 0x00 requests it to be OFF. 
+The request specifies the  address of the coil to be forced. 
+Coils are addressed starting at zero.
 
 @param u16WriteAddress address of the coil (0x0000..0xFFFF)
-@param u8State 0=OFF, non-zero=ON (0x00..0xFF)
+@param u8State 0x00=OFF, 0xff=ON , 0x55=TOGGLE
 @return 0 on success; exception number on failure
 @ingroup discrete
 */
 uint8_t ModbusMaster::writeSingleCoil(uint16_t u16WriteAddress, uint8_t u8State) {
 	_u16WriteAddress = u16WriteAddress;
-	_u16WriteQty = (u8State ? 0xFF00 : 0x0000);
+	_u16WriteQty = (u8State ? 0xFF00 : ((u8State == 0x55) ? 0x5500 : 0x0000));
 	return ModbusMasterTransaction(ku8MBWriteSingleCoil);
 }
 
